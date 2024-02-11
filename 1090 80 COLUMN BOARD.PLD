@@ -1,0 +1,64 @@
+Name     1090 80 Column Board U4;
+PartNo   ATF22V10C ;
+Date     10/28/2022 ;
+Revision 01 ;
+Designer Unknown ;
+Company  Atari ;
+Assembly None ;
+Location U4 ;
+Device   g22v10 ;
+
+/* Re-created from the JED file posted at atarimuseum.com by  */
+/* Brian E. Reifsnyder                                        */
+
+/* *************** INPUT PINS *********************/
+PIN   1 = A8                      ; /* Address Lines                   */ 
+PIN   2 = A9                      ; /*                                 */ 
+PIN   3 = A10                     ; /*                                 */ 
+PIN   4 = A11                     ; /*                                 */ 
+PIN   5 = A12                     ; /*                                 */ 
+PIN   6 = A13                     ; /*                                 */ 
+PIN   7 = A14                     ; /*                                 */ 
+PIN   8 = A15                     ; /*                                 */ 
+PIN   9 = CARDSEL                 ; /* Card Select  (Always set low.)  */ 
+PIN  10 = xxFx                    ; /*                                 */ 
+PIN  11 = xxxF                    ; /*                                 */ 
+PIN  13 = MNR                     ; /*                                 */ 
+PIN  15 = RW                      ; /* Buffered Read/Write             */ 
+PIN  16 = Phi2                    ; /* Buffered Phi2 Clock             */ 
+PIN  21 = DSEL                    ; /* Device Selected (if high)       */ 
+/* *************** OUTPUT PINS *********************/
+PIN  14 = MPD                     ; /* Math Pack Disable               */ 
+PIN  17 = LDBUFFSEL               ; /* Data Buffer Select Logic        */ 
+PIN  18 = DBUFFSEL                ; /* Data Buffer Select              */ 
+PIN  19 = EXTSEL                  ; /*                                 */ 
+PIN  20 = D1Fx                    ; /*                                 */ 
+PIN  22 = D1FFw                   ; /* D1FF Write                      */ 
+PIN  23 = D1FFr                   ; /* D1FF Read                       */ 
+
+
+/* Equations:  */
+
+!MPD = DSEL;
+/*MPD.oe = DSEL;*/
+
+LDBUFFSEL = EXTSEL #
+       Phi2 & D1Fx #
+       !MNR;
+/*LDBUFFSEL.oe = !CARDSEL       Originally, was set to VCC.  As CARDSEL is always low, this works. */
+
+!DBUFFSEL = !LDBUFFSEL;
+DBUFFSEL.oe = !LDBUFFSEL;
+
+!EXTSEL = A11 & A12 & !A13 & A14 & A15 & !CARDSEL & DSEL;    /* EXTSEL if $D8xx through $DFFF & DSEL */
+EXTSEL.oe = !CARDSEL;        /* See note for LDBUFFSEL.oe   */
+
+!D1Fx = A8 & !A9 & !A10 & !A11 & A12 & !A13 & A14 & A15 & !CARDSEL & !xxFx;
+D1Fx.oe = !CARDSEL;          /* See note for LDBUFFSEL.oe   */
+
+!D1FFw = A8 & !A9 & !A10 & !A11 & A12 & !A13 & A14 & A15 & !CARDSEL & !xxFx & !xxxF & !RW & Phi2;
+D1FFw.oe = !CARDSEL;         /* See note for LDBUFFSEL.oe   */
+
+!D1FFr = A8 & !A9 & !A10 & !A11 & A12 & !A13 & A14 & A15 & !CARDSEL & !xxFx & !xxxF & RW & Phi2;
+D1FFr.oe = A8 & !A9 & !A10 & !A11 & A12 & !A13 & A14 & A15 & !CARDSEL & !xxFx & !xxxF & RW & Phi2;
+
